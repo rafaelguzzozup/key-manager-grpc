@@ -18,4 +18,9 @@ class ChavePix(
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     var id: String? = null
+
+    fun pertenceAoCliente(clienteId: String): Boolean {
+        return this.clienteId == clienteId
+    }
+
 }

@@ -9,6 +9,7 @@ package br.com.zup.edu;
 
 service KeyManagerGrpcService {
     rpc cadastrarChavePix (NovaChavePixRequest) returns (NovaChavePixResponse) {}
+    rpc deletarChavePix (DeletaChavePixRequest) returns (DeletaChavePixResponse) {}
 }
 
 enum TipoChavePix {
@@ -35,3 +36,10 @@ message NovaChavePixRequest {
 message NovaChavePixResponse {
     string pixId = 1;
 }
+
+message DeletaChavePixRequest {
+    string pixId = 1;
+    string idCliente = 2;
+}
+
+message DeletaChavePixResponse {}

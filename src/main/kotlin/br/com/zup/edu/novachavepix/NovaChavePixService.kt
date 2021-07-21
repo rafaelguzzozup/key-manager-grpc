@@ -1,12 +1,11 @@
 package br.com.zup.edu.novachavepix
 
 import br.com.zup.edu.exception.ChavePixExistenteException
-import br.com.zup.edu.exception.ClienteNaoEcontradoException
+import br.com.zup.edu.exception.RecursoNaoEcontradoException
 import br.com.zup.edu.httpclient.erpitau.ErpItauClientExterno
 import br.com.zup.edu.novachavepix.dto.NovaChavePixDto
 import br.com.zup.edu.novachavepix.model.ChavePix
 import io.micronaut.validation.Validated
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.transaction.Transactional
@@ -27,7 +26,7 @@ class NovaChavePixService(
         }
 
         val possivelClienteItau = erpItauClientExterno.consultaCliente(novaChavePixDto.clienteId)
-        val conta = possivelClienteItau.body() ?: throw ClienteNaoEcontradoException("Cliente não encontrado")
+        val conta = possivelClienteItau.body() ?: throw RecursoNaoEcontradoException("Cliente não encontrado")
 
         val chave = novaChavePixDto.converterParaEntidade()
 

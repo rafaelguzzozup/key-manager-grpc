@@ -1,8 +1,6 @@
 package br.com.zup.edu.novachavepix
 
-import br.com.zup.edu.KeyManagerGrpcServiceGrpc
-import br.com.zup.edu.NovaChavePixRequest
-import br.com.zup.edu.NovaChavePixResponse
+import br.com.zup.edu.*
 import br.com.zup.edu.compartilhado.handlers.ErrorAroundHandler
 import io.grpc.stub.StreamObserver
 import javax.inject.Inject
@@ -21,6 +19,8 @@ class NovaChavePixEndpoint(@Inject val novaChavePixService: NovaChavePixService)
         responseObserver!!.onNext(NovaChavePixResponse.newBuilder().setPixId(chavePix.id).build())
         responseObserver!!.onCompleted()
     }
+
+
 
 
 }

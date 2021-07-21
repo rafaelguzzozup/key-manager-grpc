@@ -1,7 +1,8 @@
 package br.com.zup.edu.compartilhado.handlers
 
 import br.com.zup.edu.exception.ChavePixExistenteException
-import br.com.zup.edu.exception.ClienteNaoEcontradoException
+import br.com.zup.edu.exception.RecursoNaoEcontradoException
+import br.com.zup.edu.exception.RecursoNaoPermitidoException
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.micronaut.aop.InterceptorBean
@@ -24,10 +25,13 @@ class ErrorAroundHandlerInterceptor : MethodInterceptor<Any, Any> {
                 is ChavePixExistenteException -> Status.ALREADY_EXISTS
                     .withDescription(ex.message)
 
-                is ClienteNaoEcontradoException -> Status.NOT_FOUND
+                is RecursoNaoEcontradoException -> Status.NOT_FOUND
                     .withDescription(ex.message)
 
                 is ConstraintViolationException -> Status.INVALID_ARGUMENT
+                    .withDescription(ex.message)
+
+                is RecursoNaoPermitidoException -> Status.PERMISSION_DENIED
                     .withDescription(ex.message)
 
                 else -> Status.UNKNOWN
