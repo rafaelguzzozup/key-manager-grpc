@@ -7,7 +7,7 @@ import br.com.zup.edu.novachavepix.model.TipoChave
 import br.com.zup.edu.TipoConta.TIPO_CONTA_DESCONHECIDO
 import br.com.zup.edu.novachavepix.model.TipoConta
 
-fun NovaChavePixRequest.converteParaDtoValido(): NovaChavePixDto {
+fun NovaChavePixRequest.converteParaDto(): NovaChavePixDto {
 
     return NovaChavePixDto(
         clienteId = idCliente,

@@ -16,8 +16,8 @@ class NovaChavePixEndpoint(@Inject val novaChavePixService: NovaChavePixService)
         request: NovaChavePixRequest?,
         responseObserver: StreamObserver<NovaChavePixResponse>?,
     ) {
-        val novaChavePixDtoValida = request!!.converteParaDtoValido()
-        val chavePix = novaChavePixService.registraChavePix(novaChavePixDtoValida)
+        val novaChavePixDto = request!!.converteParaDto()
+        val chavePix = novaChavePixService.registraChavePix(novaChavePixDto)
         responseObserver!!.onNext(NovaChavePixResponse.newBuilder().setPixId(chavePix.id).build())
         responseObserver!!.onCompleted()
     }
