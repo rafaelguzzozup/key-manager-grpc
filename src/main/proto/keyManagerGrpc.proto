@@ -46,4 +46,7 @@ message DeletaChavePixRequest {
     string idCliente = 2;
 }
 
-message DeletaChavePixResponse {}
+message DeletaChavePixResponse {
+    string pixId = 1;
+    string idCliente = 2;
+}

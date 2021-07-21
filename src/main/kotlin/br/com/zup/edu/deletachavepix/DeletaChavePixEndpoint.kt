@@ -25,7 +25,10 @@ class DeletaChavePixEndpoint(val service: DeletaChavePixService) :
 
         service.deletar(request.pixId, request.idCliente)
 
-        responseObserver.onNext(DeletaChavePixResponse.newBuilder().build())
+        responseObserver.onNext(DeletaChavePixResponse.newBuilder()
+            .setPixId(request.pixId)
+            .setIdCliente(request.idCliente)
+            .build())
         responseObserver.onCompleted()
     }
 

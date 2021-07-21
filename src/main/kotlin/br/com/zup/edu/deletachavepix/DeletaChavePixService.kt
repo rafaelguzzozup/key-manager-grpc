@@ -12,8 +12,6 @@ import javax.validation.constraints.NotBlank
 class DeletaChavePixService(
     val repository: ChavePixRepository,
 ) {
-
-
     @Transactional
     fun deletar(
         @NotBlank pixId: String,
