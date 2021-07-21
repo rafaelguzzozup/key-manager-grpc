@@ -9,6 +9,10 @@ package br.com.zup.edu;
 
 service KeyManagerGrpcService {
     rpc cadastrarChavePix (NovaChavePixRequest) returns (NovaChavePixResponse) {}
+
+}
+
+service KeyManagerRemoveGrpcService {
     rpc deletarChavePix (DeletaChavePixRequest) returns (DeletaChavePixResponse) {}
 }
 

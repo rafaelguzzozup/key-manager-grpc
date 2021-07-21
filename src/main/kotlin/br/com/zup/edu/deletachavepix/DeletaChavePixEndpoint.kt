@@ -1,9 +1,6 @@
 package br.com.zup.edu.deletachavepix
 
-import br.com.zup.edu.DeletaChavePixRequest
-import br.com.zup.edu.DeletaChavePixResponse
-import br.com.zup.edu.KeyManagerGrpcServiceGrpc
-import br.com.zup.edu.NovaChavePixResponse
+import br.com.zup.edu.*
 import br.com.zup.edu.compartilhado.handlers.ErrorAroundHandler
 import br.com.zup.edu.exception.RecursoNaoEcontradoException
 import br.com.zup.edu.exception.RecursoNaoPermitidoException
@@ -16,45 +13,21 @@ import javax.transaction.Transactional
 import javax.validation.Valid
 
 @ErrorAroundHandler
-@Validated
 @Singleton
-class DeletaChavePixEndpoint : KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceImplBase() {
+class DeletaChavePixEndpoint(val service: DeletaChavePixService) :
+    KeyManagerRemoveGrpcServiceGrpc.KeyManagerRemoveGrpcServiceImplBase() {
 
-    @Inject
-    lateinit var repository: ChavePixRepository
 
     override fun deletarChavePix(
-        request: DeletaChavePixRequest?,
-        responseObserver: StreamObserver<DeletaChavePixResponse>?,
+        request: DeletaChavePixRequest,
+        responseObserver: StreamObserver<DeletaChavePixResponse>,
     ) {
-        val deletaChavePixDto = request!!.toModel()
-        deletar(deletaChavePixDto)
 
-        responseObserver!!.onNext(DeletaChavePixResponse.newBuilder().build())
-        responseObserver!!.onCompleted()
+        service.deletar(request.pixId, request.idCliente)
+
+        responseObserver.onNext(DeletaChavePixResponse.newBuilder().build())
+        responseObserver.onCompleted()
     }
 
-    fun DeletaChavePixRequest.toModel(): DeletaChavePixDto {
-        return DeletaChavePixDto(
-            clienteId = idCliente,
-            pixId = pixId
-        )
-    }
 
-    @Transactional
-    fun deletar(@Valid deletaChavePixDto: DeletaChavePixDto) {
-        val possivelChavePix = repository.findById(deletaChavePixDto.pixId)
-
-        if (possivelChavePix.isEmpty) {
-            throw RecursoNaoEcontradoException("Chave não encontrada com o Pix Id informado")
-        }
-
-        val chavePix = possivelChavePix.get()
-
-        if (!chavePix.pertenceAoCliente(deletaChavePixDto.clienteId)) {
-            throw RecursoNaoPermitidoException("A chave não pode ser deletada, pois não pertence ao cliente informado")
-        }
-
-        repository.delete(chavePix)
-    }
 }

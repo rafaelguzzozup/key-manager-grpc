@@ -36,7 +36,7 @@ class ErrorAroundHandlerInterceptor : MethodInterceptor<Any, Any> {
 
                 else -> Status.UNKNOWN
                     .withCause(ex)
-                    .withDescription("Ops, um erro inesperado ocorreu")
+                    .withDescription(ex.message)
             }
 
             responseObserver.onError(status.asRuntimeException())
