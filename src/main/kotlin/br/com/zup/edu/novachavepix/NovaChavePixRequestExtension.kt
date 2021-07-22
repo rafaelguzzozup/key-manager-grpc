@@ -2,9 +2,9 @@ package br.com.zup.edu.novachavepix
 
 import br.com.zup.edu.NovaChavePixRequest
 import br.com.zup.edu.TipoChavePix.TIPO_CHAVE_DESCONHECIDO
+import br.com.zup.edu.TipoConta.TIPO_CONTA_DESCONHECIDO
 import br.com.zup.edu.novachavepix.dto.NovaChavePixDto
 import br.com.zup.edu.novachavepix.model.TipoChave
-import br.com.zup.edu.TipoConta.TIPO_CONTA_DESCONHECIDO
 import br.com.zup.edu.novachavepix.model.TipoConta
 
 fun NovaChavePixRequest.converteParaDto(): NovaChavePixDto {
@@ -22,3 +22,4 @@ fun NovaChavePixRequest.converteParaDto(): NovaChavePixDto {
         }
     )
 }
+

@@ -4,10 +4,20 @@ import br.com.zup.edu.KeyManagerGrpcServiceGrpc
 import br.com.zup.edu.NovaChavePixRequest
 import br.com.zup.edu.TipoChavePix
 import br.com.zup.edu.TipoConta
+import br.com.zup.edu.httpclient.bcb.BcbClientExterno
+import br.com.zup.edu.httpclient.bcb.dto.AccountType
+import br.com.zup.edu.httpclient.bcb.dto.BankAccount
+import br.com.zup.edu.httpclient.bcb.dto.Owner
+import br.com.zup.edu.httpclient.bcb.dto.PixKeyType
+import br.com.zup.edu.httpclient.bcb.dto.create.CreatePixKeyRequest
+import br.com.zup.edu.httpclient.bcb.dto.create.CreatePixKeyResponse
 import br.com.zup.edu.httpclient.erpitau.ErpItauClientExterno
 import br.com.zup.edu.httpclient.erpitau.dto.ClienteItauResponse
+import br.com.zup.edu.httpclient.erpitau.dto.DadosDaContaResponse
 import br.com.zup.edu.httpclient.erpitau.dto.Instituicao
+import br.com.zup.edu.httpclient.erpitau.dto.Titular
 import br.com.zup.edu.novachavepix.model.ChavePix
+import br.com.zup.edu.novachavepix.model.ContaAssociada
 import br.com.zup.edu.novachavepix.model.TipoChave
 import br.com.zup.edu.novachavepix.model.TipoConta.*
 import io.grpc.ManagedChannel
@@ -37,6 +47,9 @@ internal class NovaChavePixEndpointTest(
     @Inject
     lateinit var itauClient: ErpItauClientExterno
 
+    @Inject
+    lateinit var bcbClient: BcbClientExterno
+
     companion object {
         val CLIENT_ID = UUID.randomUUID()
     }
@@ -50,13 +63,48 @@ internal class NovaChavePixEndpointTest(
     fun `deve cadastrar uma chave pix`() {
 
         //cenario
-        `when`(itauClient.consultaCliente(clienteId = CLIENT_ID.toString())).thenReturn(HttpResponse.ok(
-            ClienteItauResponse(
-                id = CLIENT_ID.toString(),
-                nome = "Rafal Guzzo",
-                cpf = "07344506050",
-                instituicao = Instituicao(nome = "UNIBANCO ITAU SA", ispb = "60701190")
-            )))
+        `when`(itauClient.buscaContaPorTipo(clienteId = CLIENT_ID.toString(), tipo = "CONTA_CORRENTE")).thenReturn(
+            HttpResponse.ok(
+                DadosDaContaResponse(
+                    tipo = "CONTA_CORRENTE",
+                    instituicao = Instituicao(nome = "UNIBANCO ITAU SA", ispb = "60701190"),
+                    agencia = "0001",
+                    numero = "291900",
+                    titular = Titular(id = "c56dfef4-7901-44fb-84e2-a2cefb157890", nome = "Rafael", cpf = "02467781054")
+                )))
+
+        `when`(bcbClient.cadastrarChavePix(
+            CreatePixKeyRequest(
+                keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
+                key = novaChavePixRequest()!!.valor,
+                bankAccount = BankAccount(
+                    participant = "60701190",
+                    branch = "0001",
+                    accountNumber = "291900",
+                    accountType = AccountType.converter(CONTA_CORRENTE)
+                ),
+                owner = Owner(
+                    type = "NATURAL_PERSON",
+                    name = "Rafael",
+                    taxIdNumber = "02467781054"
+                )
+            )
+        )).thenReturn(HttpResponse.created(CreatePixKeyResponse(
+            keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
+            key = novaChavePixRequest()!!.valor,
+            bankAccount = BankAccount(
+                participant = "60701190",
+                branch = "0001",
+                accountNumber = "291900",
+                accountType = AccountType.converter(CONTA_CORRENTE)
+            ),
+            owner = Owner(
+                type = "NATURAL_PERSON",
+                name = "Rafael",
+                taxIdNumber = "02467781054"
+            ),
+            createdAt = ""
+        )))
 
         //acao
         val response = grpcClient.cadastrarChavePix(novaChavePixRequest())
@@ -75,6 +123,14 @@ internal class NovaChavePixEndpointTest(
             tipoChave = TipoChave.EMAIL,
             valor = novaChavePixRequest()!!.valor,
             tipoConta = CONTA_CORRENTE,
+            conta = ContaAssociada(
+                agencia = "0001",
+                numero = "291900",
+                instituicao = "ITAÚ UNIBANCO S.A.",
+                ispb = "60701190",
+                cpf = "02467781054",
+                nomeTitular = "Rafael M C Ponte"
+            )
         ))
 
         val exception = assertThrows<StatusRuntimeException> {
@@ -90,7 +146,8 @@ internal class NovaChavePixEndpointTest(
 
     @Test
     fun `nao deve cadastrar uma chave pix quando cliente inexistente`() {
-        `when`(itauClient.consultaCliente(clienteId = CLIENT_ID.toString())).thenReturn(HttpResponse.notFound())
+        `when`(itauClient.buscaContaPorTipo(clienteId = CLIENT_ID.toString(), tipo = "CONTA_CORRENTE")).thenReturn(
+            HttpResponse.notFound())
 
         val exception = assertThrows<StatusRuntimeException> {
             grpcClient.cadastrarChavePix(novaChavePixRequest())
@@ -115,7 +172,12 @@ internal class NovaChavePixEndpointTest(
 
     @MockBean(ErpItauClientExterno::class)
     fun itauClient(): ErpItauClientExterno? {
-        return Mockito.mock(ErpItauClientExterno::class.java);
+        return Mockito.mock(ErpItauClientExterno::class.java)
+    }
+
+    @MockBean(BcbClientExterno::class)
+    fun bcbClient(): BcbClientExterno? {
+        return Mockito.mock(BcbClientExterno::class.java)
     }
 
     @Factory
