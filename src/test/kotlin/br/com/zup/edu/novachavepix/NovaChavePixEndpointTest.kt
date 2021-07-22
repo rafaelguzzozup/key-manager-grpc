@@ -64,47 +64,9 @@ internal class NovaChavePixEndpointTest(
 
         //cenario
         `when`(itauClient.buscaContaPorTipo(clienteId = CLIENT_ID.toString(), tipo = "CONTA_CORRENTE")).thenReturn(
-            HttpResponse.ok(
-                DadosDaContaResponse(
-                    tipo = "CONTA_CORRENTE",
-                    instituicao = Instituicao(nome = "UNIBANCO ITAU SA", ispb = "60701190"),
-                    agencia = "0001",
-                    numero = "291900",
-                    titular = Titular(id = "c56dfef4-7901-44fb-84e2-a2cefb157890", nome = "Rafael", cpf = "02467781054")
-                )))
+            HttpResponse.ok(dadosDaContaResponse()))
 
-        `when`(bcbClient.cadastrarChavePix(
-            CreatePixKeyRequest(
-                keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
-                key = novaChavePixRequest()!!.valor,
-                bankAccount = BankAccount(
-                    participant = "60701190",
-                    branch = "0001",
-                    accountNumber = "291900",
-                    accountType = AccountType.converter(CONTA_CORRENTE)
-                ),
-                owner = Owner(
-                    type = "NATURAL_PERSON",
-                    name = "Rafael",
-                    taxIdNumber = "02467781054"
-                )
-            )
-        )).thenReturn(HttpResponse.created(CreatePixKeyResponse(
-            keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
-            key = novaChavePixRequest()!!.valor,
-            bankAccount = BankAccount(
-                participant = "60701190",
-                branch = "0001",
-                accountNumber = "291900",
-                accountType = AccountType.converter(CONTA_CORRENTE)
-            ),
-            owner = Owner(
-                type = "NATURAL_PERSON",
-                name = "Rafael",
-                taxIdNumber = "02467781054"
-            ),
-            createdAt = ""
-        )))
+        `when`(bcbClient.cadastrarChavePix(createPixKeyRequest())).thenReturn(HttpResponse.created(createPixKeyResponse()))
 
         //acao
         val response = grpcClient.cadastrarChavePix(novaChavePixRequest())
@@ -170,6 +132,27 @@ internal class NovaChavePixEndpointTest(
         }
     }
 
+    @Test
+    fun `nao deve cadastrar uma chave pix quando nao for possivel registrar no bcb`() {
+
+        //cenario
+        `when`(itauClient.buscaContaPorTipo(clienteId = CLIENT_ID.toString(), tipo = "CONTA_CORRENTE")).thenReturn(
+            HttpResponse.ok(dadosDaContaResponse()))
+
+        `when`(bcbClient.cadastrarChavePix(createPixKeyRequest())).thenReturn(HttpResponse.badRequest())
+
+        //acao
+        val exception = assertThrows<StatusRuntimeException> {
+            grpcClient.cadastrarChavePix(novaChavePixRequest())
+        }
+
+        with(exception) {
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            assertEquals("Erro ao registrar pix no BCB", status.description)
+        }
+
+    }
+
     @MockBean(ErpItauClientExterno::class)
     fun itauClient(): ErpItauClientExterno? {
         return Mockito.mock(ErpItauClientExterno::class.java)
@@ -197,5 +180,50 @@ internal class NovaChavePixEndpointTest(
             .build()
     }
 
+    private fun createPixKeyRequest(): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
+            key = novaChavePixRequest()!!.valor,
+            bankAccount = BankAccount(
+                participant = "60701190",
+                branch = "0001",
+                accountNumber = "291900",
+                accountType = AccountType.converter(CONTA_CORRENTE)
+            ),
+            owner = Owner(
+                type = "NATURAL_PERSON",
+                name = "Rafael",
+                taxIdNumber = "02467781054"
+            )
+        )
+    }
 
+    private fun createPixKeyResponse(): CreatePixKeyResponse {
+        return CreatePixKeyResponse(
+            keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
+            key = novaChavePixRequest()!!.valor,
+            bankAccount = BankAccount(
+                participant = "60701190",
+                branch = "0001",
+                accountNumber = "291900",
+                accountType = AccountType.converter(CONTA_CORRENTE)
+            ),
+            owner = Owner(
+                type = "NATURAL_PERSON",
+                name = "Rafael",
+                taxIdNumber = "02467781054"
+            ),
+            createdAt = ""
+        )
+    }
+
+    private fun dadosDaContaResponse(): DadosDaContaResponse {
+        return DadosDaContaResponse(
+            tipo = "CONTA_CORRENTE",
+            instituicao = Instituicao(nome = "UNIBANCO ITAU SA", ispb = "60701190"),
+            agencia = "0001",
+            numero = "291900",
+            titular = Titular(id = "c56dfef4-7901-44fb-84e2-a2cefb157890", nome = "Rafael", cpf = "02467781054")
+        )
+    }
 }

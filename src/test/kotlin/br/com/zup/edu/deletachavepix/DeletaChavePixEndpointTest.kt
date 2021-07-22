@@ -112,6 +112,26 @@ internal class DeletaChavePixEndpointTest(
 
     }
 
+    @Test
+    fun `nao deve remover uma chave pix existente quando ocorrer algum erro no servico do BCB`() {
+        `when`(bcbClient.deletarChavePix(
+            CHAVE_EXISTENTE.valor,
+            DeletePixKeyRequest(CHAVE_EXISTENTE.valor, CHAVE_EXISTENTE.conta.ispb)
+        )).thenReturn(HttpResponse.unprocessableEntity())
+
+        val exception = assertThrows<StatusRuntimeException> {
+            grpcClient.deletarChavePix(DeletaChavePixRequest.newBuilder()
+                .setIdCliente(CHAVE_EXISTENTE.clienteId)
+                .setPixId(CHAVE_EXISTENTE.id)
+                .build())
+        }
+
+        with(exception) {
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            assertEquals("Erro ao deletar pix no BCB", status.description)
+        }
+    }
+
     @MockBean(BcbClientExterno::class)
     fun bcbClient(): BcbClientExterno? {
         return Mockito.mock(BcbClientExterno::class.java)
