@@ -15,7 +15,7 @@ data class CreatePixKeyRequest(
     companion object {
         fun toDto(chavePix: ChavePix): CreatePixKeyRequest {
             return CreatePixKeyRequest(
-                keyType = PixKeyType.converter(chavePix.tipoChave!!),
+                keyType = PixKeyType.converterParaPixKeyType(chavePix.tipoChave!!),
                 key = chavePix.valor,
                 bankAccount = BankAccount(
                     participant = chavePix.conta.ispb,

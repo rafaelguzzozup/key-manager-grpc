@@ -7,6 +7,8 @@ option objc_class_prefix = "HLW";
 
 package br.com.zup.edu;
 
+import "google/protobuf/timestamp.proto";
+
 service KeyManagerGrpcService {
     rpc cadastrarChavePix (NovaChavePixRequest) returns (NovaChavePixResponse) {}
 
@@ -14,6 +16,10 @@ service KeyManagerGrpcService {
 
 service KeyManagerRemoveGrpcService {
     rpc deletarChavePix (DeletaChavePixRequest) returns (DeletaChavePixResponse) {}
+}
+
+service KeyManagerDadosGrpcService {
+    rpc dadosChavePix (DadosChavePixRequest) returns (DadosChavePixResponse) {}
 }
 
 enum TipoChavePix {
@@ -49,4 +55,45 @@ message DeletaChavePixRequest {
 message DeletaChavePixResponse {
     string pixId = 1;
     string idCliente = 2;
+}
+
+message DadosChavePixRequest {
+
+    message PixId {
+        string pixId = 2;
+        string idCliente = 3;
+    }
+
+    oneof busca {
+        string chave = 1;
+        PixId pixId = 2;
+    }
+}
+
+
+
+message DadosChavePixResponse {
+
+    string clienteId = 1;
+    string pixId = 2;
+    ChavePix chave = 3;
+
+    message ChavePix {
+
+        message Conta {
+            TipoConta tipo = 1;
+            string instituicao = 2;
+            string nomeDoTitular = 3;
+            string cpfDoTitular = 4;
+            string agencia = 5;
+            string numeroDaConta = 6;
+        }
+
+        TipoChavePix tipo = 1;
+        string chave = 2;
+        Conta conta = 3;
+        google.protobuf.Timestamp criadaEm = 4;
+    }
+
+
 }

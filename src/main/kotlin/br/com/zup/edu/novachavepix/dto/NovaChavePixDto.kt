@@ -26,7 +26,7 @@ data class NovaChavePixDto(
     fun converterParaEntidade(conta: ContaAssociada): ChavePix {
         return ChavePix(
             clienteId = clienteId!!,
-            tipoChave = tipoChave,
+            tipoChave = tipoChave!!,
             tipoConta = tipoConta!!,
             valor = if (this.tipoChave == TipoChave.ALEATORIO) UUID.randomUUID().toString() else this.valor!!,
             conta = conta

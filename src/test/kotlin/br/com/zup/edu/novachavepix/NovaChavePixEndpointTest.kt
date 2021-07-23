@@ -12,7 +12,6 @@ import br.com.zup.edu.httpclient.bcb.dto.PixKeyType
 import br.com.zup.edu.httpclient.bcb.dto.create.CreatePixKeyRequest
 import br.com.zup.edu.httpclient.bcb.dto.create.CreatePixKeyResponse
 import br.com.zup.edu.httpclient.erpitau.ErpItauClientExterno
-import br.com.zup.edu.httpclient.erpitau.dto.ClienteItauResponse
 import br.com.zup.edu.httpclient.erpitau.dto.DadosDaContaResponse
 import br.com.zup.edu.httpclient.erpitau.dto.Instituicao
 import br.com.zup.edu.httpclient.erpitau.dto.Titular
@@ -182,7 +181,7 @@ internal class NovaChavePixEndpointTest(
 
     private fun createPixKeyRequest(): CreatePixKeyRequest {
         return CreatePixKeyRequest(
-            keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
+            keyType = PixKeyType.converterParaPixKeyType(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
             key = novaChavePixRequest()!!.valor,
             bankAccount = BankAccount(
                 participant = "60701190",
@@ -200,7 +199,7 @@ internal class NovaChavePixEndpointTest(
 
     private fun createPixKeyResponse(): CreatePixKeyResponse {
         return CreatePixKeyResponse(
-            keyType = PixKeyType.converter(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
+            keyType = PixKeyType.converterParaPixKeyType(TipoChave.valueOf(novaChavePixRequest()!!.tipoChave.name)),
             key = novaChavePixRequest()!!.valor,
             bankAccount = BankAccount(
                 participant = "60701190",
