@@ -41,6 +41,7 @@ class BuscaDadosChavePixEndpoint(
                 }
             }
         }
+        println(buscaCase.name)
         return opcao
     }
 
